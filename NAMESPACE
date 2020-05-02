@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("grDevices", "colorRampPalette", "dev.off", "pdf")
+importFrom("stats", "aggregate", "cor", "df", "median")
+importFrom("utils", "read.csv", "read.table")

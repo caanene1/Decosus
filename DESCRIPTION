@@ -1,0 +1,28 @@
+Package: Decosus
+Type: Package
+Title: Method to generate robust consesus from published cell deconvolution/aggregation methods
+Version: 0.1.2
+Author: Chinedu A. Anene, PhD
+Maintainer: Chinedu Anthony Anene <caanenedr@outlook.com>
+Description: Creates a consesus deconvolution from published methods.
+             Retreives single method values if consensus is not possible. 
+             It also implements validation anslysis, using correlation and visulisations.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    limSolve,
+    MASS,
+    preprocessCore,
+    readxl,
+    xCell,
+    MCPcounter,
+    EPIC,
+    data.table,
+    corrplot,
+Remotes:
+    dviraran/xCell
+    ebecht/MCPcounter/Source
+    GfellerLab/EPIC
+
+    
