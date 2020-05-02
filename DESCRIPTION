@@ -1,12 +1,12 @@
 Package: Decosus
 Type: Package
-Title: Method to generate robust consesus from published cell deconvolution/aggregation methods
+Title: Method to generate robust consensus from published cell deconvolution/aggregation methods 
 Version: 0.1.2
 Author: Chinedu A. Anene, PhD
 Maintainer: Chinedu Anthony Anene <caanenedr@outlook.com>
-Description: Creates a consesus deconvolution from published methods.
-             Retreives single method values if consensus is not possible. 
-             It also implements validation anslysis, using correlation and visulisations.
+Description: Creates a consensus deconvolution from published methods.
+             Retrieves single method values if consensus is not possible. 
+             It also implements validation analysis, using correlation and visualisations.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -24,5 +24,6 @@ Remotes:
     dviraran/xCell,
     ebecht/MCPcounter/Source,
     GfellerLab/EPIC
+biocViews: Software
 
     
