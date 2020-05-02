@@ -42,7 +42,7 @@ install.packages("Decosus_0.1.2.tar.gz", repos=NULL, type="source")
 
 ## Example
 
-To use Decosus on an expression matrix, simple run: 
+To use Decosus on an expression matrix, simply run: 
 ```{r example}
 results <- Decosus::cosDeco(x = df, platform = "Array")
 ```
