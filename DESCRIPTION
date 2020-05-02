@@ -21,8 +21,8 @@ Imports:
     data.table,
     corrplot,
 Remotes:
-    dviraran/xCell
-    ebecht/MCPcounter/Source
+    dviraran/xCell,
+    ebecht/MCPcounter/Source,
     GfellerLab/EPIC
 
     
