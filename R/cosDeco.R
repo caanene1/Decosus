@@ -26,7 +26,7 @@ cosDeco <- function(x = df, platform = "Array") {
   x_class <- sapply(x, class)
 
   # Get the single factor column as gene names
-  col_factor <- x_class[x_class == "factor"]
+  col_factor <- x_class[x_class %in%  c("character", "factor")]
   if (!length(col_factor) == 1) {
     stop("Expression matrix must have a column of hgnc symbols")
   }
@@ -89,8 +89,8 @@ cosDeco <- function(x = df, platform = "Array") {
   ## xCell ##
   # The use of "library()" is not ideal, but raises error without it
   # TO DO: Consider including xCell different way.
-  # library(xCell)
-  requireNamespace("xCell")
+  library(xCell)
+  # requireNamespace("xCell")
   if (platform != "array") {
     xcell <- as.data.frame(xCell::xCellAnalysis(x_immdeconv, rnaseq = TRUE))
   } else {
