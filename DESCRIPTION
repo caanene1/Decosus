@@ -21,7 +21,7 @@ Imports:
     data.table,
     corrplot,
 Remotes:
-    dviraran/xCell,
+    alex-pinto/xc,
     ebecht/MCPcounter/Source,
     GfellerLab/EPIC
 biocViews: Software
