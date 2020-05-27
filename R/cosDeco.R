@@ -21,6 +21,7 @@ cosDeco <- function(x = df, platform = "Array") {
   y <- readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
                                      package = "Decosus"),
                          sheet = "Curated")
+  print(dim(y))
 
   # Get the class of each column
   x_class <- sapply(x, class)
@@ -43,6 +44,7 @@ cosDeco <- function(x = df, platform = "Array") {
   # Get the unique soruces
   soruce <- sapply(unique(y["Group"]),
                    function(x) paste(as.character(x)))
+  print(soruce)
 
   # Seperate by soruce
   gene_sets <- lapply(soruce,
@@ -99,7 +101,11 @@ cosDeco <- function(x = df, platform = "Array") {
   #
   xcell$Source <- "xcell"
   ## End of xCell ##
-
+  ##
+  if (length(colnames(xcell)) == 0) {
+    stop("xcell analysis failed consider installing the right version at rdrr.io/github/alex-pinto/xc/")
+  }
+  ##
   ## MCP ##
   MCP <- as.data.frame(MCPcounter::MCPcounter.estimate(x_immdeconv,
                        featuresType = "HUGO_symbols",
