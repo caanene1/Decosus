@@ -68,6 +68,7 @@ cosDeco <- function(x = df, platform = "Array") {
   # Aggregate expression values by Cell (Abundance)
   aggregate_expr <- function(x) {
     x_num <- numeric_columns(x)
+    print(dim(x_num)
     aggregated <- aggregate(x_num, by = list(x$Type),
                             FUN = mean_convert)
     names(aggregated)[1] <- "Cell"
