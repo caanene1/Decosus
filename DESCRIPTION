@@ -21,6 +21,7 @@ Imports:
     data.table,
     corrplot,
     devtools,
+    precessx,
 Remotes:
     alex-pinto/xc,
     ebecht/MCPcounter/Source,
