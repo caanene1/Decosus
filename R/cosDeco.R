@@ -12,7 +12,7 @@
 #'
 #' @export
 #'
-cosDeco <- function(x = df, platform = "Array") {
+cosDeco <- function(x = df, platform = "Array", plot.corr=FALSE) {
   #### Set variables ####
   # Negation
   `%notin%` <- Negate(`%in%`)
@@ -116,8 +116,11 @@ cosDeco <- function(x = df, platform = "Array") {
   MCP$Source <- "MCP"
   ## End of MCP ##
 
+  # Suppress warning for EPIC
+  options(warn=-1)
   ## EPIC ##
   Epic <- as.data.frame(t(EPIC::EPIC(bulk = x_immdeconv)[[2]]))
+  options(warn=0)
   Epic$Source <- "EPIC"
   ## End of EPIC ##
 
@@ -253,8 +256,11 @@ cosDeco <- function(x = df, platform = "Array") {
                      tl.srt = 60)
   dev.off()
   }
+  # Plot
+  if(plot.corr){
   cor_pp(Sample_c[[2]], "Sample_consensus.pdf")
   cor_pp(Cell_c[[2]], "Cell_consensus.pdf")
+  }
   ######### End of plot correlations ##########
 
   #### Build the final output #####

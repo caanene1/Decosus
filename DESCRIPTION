@@ -20,6 +20,7 @@ Imports:
     EPIC,
     data.table,
     corrplot,
+    devtools,
 Remotes:
     alex-pinto/xc,
     ebecht/MCPcounter/Source,
