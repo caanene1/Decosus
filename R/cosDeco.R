@@ -12,7 +12,7 @@
 #'
 #' @export
 #'
-cosDeco <- function(x = df, platform = "Array", plot.corr=FALSE) {
+cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr=FALSE) {
   #### Set variables ####
   # Negation
   `%notin%` <- Negate(`%in%`)
@@ -179,8 +179,17 @@ cosDeco <- function(x = df, platform = "Array", plot.corr=FALSE) {
   sub_a_res <- subset(a_res, !is.na(a_res$cell_type))
   return(list(a_res, sub_a_res)) }
   #
-  for_samples <- fun_l_anno(k = all_results, xlSheet = "Map")
-  for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
+  {
+  if (map == "ED"){
+    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_3_UPDATED")
+    ## Change this part after Emma has updated
+    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
+  } else {
+    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map")
+    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
+  }
+  }
+
   ################# ############### ############## ######################
   ########
   ########
