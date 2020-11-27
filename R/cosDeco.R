@@ -2,7 +2,7 @@
 #'
 #' @description Function to apply seven deconvolution/signature methods as described by the respective methods.
 #'
-#' @param x, platform, defults df, "Array".
+#' @param x, platform, map, plot.corr: defaults: df, "Array", "Normal", FALSE
 #'
 #' @return t_results
 #'
@@ -12,7 +12,11 @@
 #'
 #' @export
 #'
-cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr=FALSE) {
+cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
+  # Sanity check for
+  if (is.null(map) | length(map) != 1){
+    stop("Please, select the map file to use Normal or Emma edit]")
+  }
   #### Set variables ####
   # Negation
   `%notin%` <- Negate(`%in%`)
@@ -36,17 +40,17 @@ cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr
   HGNC <- which(colnames(x) == names(col_factor))
   names(x)[HGNC] <- "Gene"
 
-  # Get the experrions of gene sets
+  # Get the expression of gene sets
   x_sub <- x[x$Gene %in% y$Gene, ]
   #### End of variable handling ####
 
   #### Handling of gene sets ####
-  # Get the unique soruces
+  # Get the unique sources
   soruce <- sapply(unique(y["Group"]),
                    function(x) paste(as.character(x)))
   print(soruce)
 
-  # Seperate by soruce
+  # Separate by sources
   gene_sets <- lapply(soruce,
                       function(x){subset(y, Group == x)})
 
@@ -78,19 +82,17 @@ cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr
 
   # Cell proportions curated signatures
   deconvoluted <- lapply(x_sub_sets, aggregate_expr)
-  # Garbage collection (To help with Emma's computer issues)
+  #
   gc()
 
-
   ############## Cell deconvolution methods ###################
-  # assign new dataframe
+  # Assign new data-frame
   x_immdeconv <- x
-  # set rownames
+  # set row_names
   rownames(x_immdeconv) <- x_immdeconv$Gene
   x_immdeconv <- x_immdeconv[,-which(names(x_immdeconv) %in% "Gene")]
 
   ## xCell ##
-  # The use of "library()" is not ideal, but raises error without it
   # TO DO: Consider including xCell different way.
   library(xCell)
   # requireNamespace("xCell")
@@ -150,10 +152,7 @@ cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr
   ############## End of cell deconvolution methods ###################
 
   ############## Building the conseus ###################
-  ## Find a way to remove old variables here
   all_results <- append(deconvoluted, deconvoluted2)
-  ########
-  ########
   ########
   ######## Remove garbage, for low power computers ########
   rm(y, x_class, col_factor, HGNC, x_sub, soruce, gene_sets, x_sub_sets,
@@ -178,14 +177,15 @@ cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr
   #
   sub_a_res <- subset(a_res, !is.na(a_res$cell_type))
   return(list(a_res, sub_a_res)) }
-  #
+
+
+  ### Updated for the modified cell map 27/11/2020
   {
-  if (map == "ED"){
-    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_3_UPDATED")
-    ## Change this part after Emma has updated
-    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
+  if (map != "Normal"){
+    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_1b")
+    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2b")
   } else {
-    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map")
+    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_1")
     for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
   }
   }
@@ -204,7 +204,7 @@ cosDeco <- function(x = df, platform = "Array", map=c("defult", "ED"), plot.corr
     aggregated$Source <- "consensus"
     return(aggregated) }
 
-  ### Function consesus avilable####
+  ### Function consesus available ####
   avilab <- function(f) {
   sub <- f
   con_score <- aggregate_cell(sub)

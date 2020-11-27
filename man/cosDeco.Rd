@@ -8,7 +8,8 @@ Creates consesus from published cell deconvolution/aggregation methods.
 Function to consolidate seven deconvolution method and signatures.
 }
 \usage{
-cosDeco(x = df, platform = "Array")
+cosDeco(x = df, platform = "Array", map="Normal", plot.corr=FALSE)
+
 }
 
 \arguments{
@@ -18,12 +19,19 @@ The data frame with samples in column/names and rows/rownames as genes.
   \item{platform}{
 String value indicating the platform. Defaults to Array.
 }
-
+  \item{map}{
+String value indicating the cell map to use for consesus. "Normal"-Defualt cell maps or any string for EMMA's map.
 }
+  \item{plot.corr}{
+Boolen to plot or not plot the evaluation correlation plots. Only need for development of the tool.
+}
+}
+
 \details{
 A Consesus approache to cell proportions/deconvulations builds on the strength of aggregation and deconvolution methods. This generates robust estimates of cell proprotions/contents in a gene expression dataset.
 
 }
+
 \value{
 A list of three dataframes and two correlation pdfs in the working directory.
  \item{main_samples}{Table of consesus values for comparing samples }
@@ -40,7 +48,7 @@ Davoli
 Rooney
 quanTISeq
 EPIC
- Uses base R functions and ??.
+ Uses base R functions.
 }
 
 \author{

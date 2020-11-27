@@ -1,7 +1,7 @@
 Package: Decosus
 Type: Package
 Title: Method to generate robust consensus from published cell deconvolution/aggregation methods 
-Version: 0.1.2
+Version: 0.1.3
 Author: Chinedu A. Anene, PhD
 Maintainer: Chinedu Anthony Anene <caanenedr@outlook.com>
 Description: Creates a consensus deconvolution from published methods.
