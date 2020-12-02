@@ -16,14 +16,14 @@ Use:
   devtools::install_github("GfellerLab/EPIC", build_vignettes = TRUE)
 You may need to install devtools.
 
-## Installation
+# Installation
 You can install the released version of Decosus from [github](https://github.com/caanene1) with:
 
 ``` r
 devtools::install_github('caanene1/Decosus')
 ```
 
-## Example
+# Example
 To use Decosus on an expression matrix, simply run: 
 ```{r example}
 results <- Decosus::cosDeco(x = df, platform = "Array")
