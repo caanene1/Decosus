@@ -24,11 +24,15 @@ You can install the released version of Decosus from [github](https://github.com
 ``` r
 devtools::install_github('caanene1/Decosus')
 ```
+or 
+``` r
+devtools::install_github('BioInforCore-BCI/Decosus')
+```
 
 # Example
 To use Decosus on an expression matrix, simply run: 
 ```{r example}
-results <- Decosus::cosDeco(x = df, platform = "Array")
+results <- Decosus::cosDeco(x = df, platform = "Array", map="Normal", plot.corr=FALSE)
 ```
 
 # Additional usage note
