@@ -12,11 +12,9 @@
 #'
 #' @export
 #'
-cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
-  # Sanity check for
-  if (is.null(map) | length(map) != 1){
-    stop("Please, select the map file to use Normal or Emma edit]")
-  }
+cosDeco <- function(x = df, platform = "Array") {
+  plot.corr=FALSE
+
   #### Set variables ####
   # Negation
   `%notin%` <- Negate(`%in%`)
@@ -60,6 +58,7 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
   #### Ends of gene sets handling ####
 
   #### Aggregation ####
+  #### Anthony Look art this again +++++
   # Force numeric for NA values
   mean_convert <- function(x) {
     mean(as.numeric(as.character(x))) }
@@ -157,10 +156,8 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
   ######## Remove garbage, for low power computers ########
   rm(y, x_class, col_factor, HGNC, x_sub, soruce, gene_sets, x_sub_sets,
      deconvoluted, x_immdeconv, xcell, MCP, Epic, quanTISeq, deconvoluted2)
-  ######## £££££££££££££££££££££££££££££££££££££££ ########
-  ########
-  ########
-  ########
+
+
   ################# ############### ############## #######################
   # Bind to frame
   all_results = as.data.frame(data.table::rbindlist(all_results))
@@ -179,21 +176,20 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
   return(list(a_res, sub_a_res)) }
 
 
-  ### Updated for the modified cell map 27/11/2020
-  {
-  if (map != "Normal"){
-    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_1b")
-    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2b")
-  } else {
-    for_samples <- fun_l_anno(k = all_results, xlSheet = "Map_1")
-    for_cells <- fun_l_anno(k = all_results, xlSheet = "Map_2")
-  }
-  }
+  ### Updated for the modified cell map 29/01/2021
+  for_samples <- lapply(list("Map_1", "Map_1b", "Map_1c"),
+                        function(x) {
+                          fun_l_anno(k = all_results, xlSheet = x)
+                          })
+
+  #
+  for_cells <- lapply(list("Map_2", "Map_2b", "Map_2c"),
+                        function(x) {
+                          fun_l_anno(k = all_results, xlSheet = x)
+                        })
 
   ################# ############### ############## ######################
   ########
-  ########
-  ### Consesus ####
   ### Aggregate the methods ###
   aggregate_cell <- function(x) {
     # See fun, numeric_columns, mean_convert, above
@@ -204,7 +200,7 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
     aggregated$Source <- "consensus"
     return(aggregated) }
 
-  ### Function consesus available ####
+  # Function consensus available
   avilab <- function(f) {
   sub <- f
   con_score <- aggregate_cell(sub)
@@ -222,13 +218,19 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
   outavil <- list(con_score, con_avil)
   return(outavil)
   }
-  # Between sample consesus
-  Sample_c <- avilab(for_samples[[2]])
-  # Between cell consesus
-  Cell_c <- avilab(for_cells[[2]])
-  ### End of consesus ####
 
-  ######### Plot correlations ##########
+  # Function bind consensus and non-consensus
+  cons_nonCons <- function(u, z) {
+    sub_non <- subset(u, is.na(u$cell_type))
+    rownames(sub_non) <- sub_non$ID
+    sub_non <- sub_non[ , which(names(sub_non) %notin%
+                                  c("Source.x", "Source.y",
+                                    "Source_cell_type",
+                                    "full_annotation",
+                                    "cell_type", "Cell", "ID"))]
+    res_f <- rbind(z, sub_non)
+    return(res_f) }
+
   # Function plot correlation
   cor_pp <- function(p, pdf.name) {
   # Set the custom colour scheme
@@ -266,6 +268,7 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
                      tl.srt = 60)
   dev.off()
   }
+
   # Plot
   if(plot.corr){
   cor_pp(Sample_c[[2]], "Sample_consensus.pdf")
@@ -273,23 +276,22 @@ cosDeco <- function(x = df, platform = "Array", map="Normal", plot.corr=FALSE) {
   }
   ######### End of plot correlations ##########
 
-  #### Build the final output #####
-  # Function bind consensus and non-consensus
-  cons_nonCons <- function(u, z) {
-  sub_non <- subset(u, is.na(u$cell_type))
-  rownames(sub_non) <- sub_non$ID
-  sub_non <- sub_non[ , which(names(sub_non) %notin%
-                                c("Source.x", "Source.y",
-                                  "Source_cell_type",
-                                  "full_annotation",
-                                  "cell_type", "Cell", "ID"))]
-  res_f <- rbind(z, sub_non)
-  return(res_f) }
-  # Bind
-  output <- list(main_samples = cons_nonCons(u = for_samples[[1]], z = Sample_c[[1]]),
-                 main_cells = cons_nonCons(u = for_cells[[1]], z = Cell_c[[1]]),
+  ### Build output
+  {
+    main_samples <- lapply(for_samples, function(x) {
+      cons_nonCons(u = x[[1]], z = avilab(x[[2]])[[1]])
+    })
+
+    names(main_samples) <- c("Map_1", "Map_1b", "Map_1c")
+
+    main_cells <- lapply(for_cells, function(x) {
+      cons_nonCons(u = x[[1]], z = avilab(x[[2]])[[1]])
+    })
+    names(main_cells) <- c("Map_2", "Map_2b", "Map_2c")
+  }
+
+  output <- list(main_samples = main_samples,
+                 main_cells = main_cells,
                  raw_results = all_results)
-  #### End of build the final output #####
-  #
   return(output)
 }
