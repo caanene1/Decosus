@@ -1,4 +1,4 @@
-#' @title Create consesus deconvolution from "xcell, MCP, Danaher, Davoli, Rooney, quanTISeq, EPIC".
+#' @title Create consensus deconvolution from "xcell, MCP, Danaher, Davoli, Rooney, quanTISeq, EPIC".
 #'
 #' @description Function to apply seven deconvolution/signature methods as described by the respective methods.
 #'
@@ -25,7 +25,6 @@ cosDeco <- function(x = df, platform = "Array") {
                          sheet = "Curated")
   print(dim(y))
 
-  # Get the class of each column
   x_class <- sapply(x, class)
 
   # Get the single factor column as gene names
