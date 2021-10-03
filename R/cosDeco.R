@@ -330,15 +330,19 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
   cor_mcons[is.na(cor_mcons)] <- 0
   coCo <- data.frame(Name = colnames(cor_mcons))
 
-  if(nrow(cp) >= 1){
+  if(is.null(cp)){
+    ord_mycolors <- NULL
+
+  } else {
+
+    if(nrow(cp) >= 1) {
     coloo <- merge(coCo, cp, by = "Name", sort = F)
     mycolors <- coloo$Colour
     names(mycolors) <- coloo$Name
     ord_mycolors <- mycolors[corrplot::corrMatOrder(cor_mcons,
                                                     order = "hclust",
                                                     hclust.method = "complete")]
-  } else {
-    ord_mycolors <- NULL
+    }
   }
 
 
