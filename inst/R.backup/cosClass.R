@@ -1,3 +1,9 @@
+# https://github.com/icbi-lab/immunedeconv
+
+# load("/Users/chineduanene/Documents/OneDrive/Decosus/Data/data_bench.RData")
+
+
+
 # Class
 base.class = "data.frame"
 `%notin%` <- Negate(`%in%`)
@@ -30,24 +36,18 @@ setGeneric("addExpression", function(x, y) standardGeneric("addExpression"))
 
 setGeneric("addSignature", function(x, ext, sig, anno.1, anno.2) standardGeneric("addSignature"))
 
-setGeneric("deconvolveCell", function(x, y, rnaseq, free) standardGeneric("deconvolveCell"))
+setGeneric("deconvolveCell", function(x, y, rnaseq) standardGeneric("deconvolveCell"))
 
-setGeneric("deconvoleConsensus", function(x) standardGeneric("deconvoleConsensus"))
+setGeneric("deconvoleConsensus", function(x, free=FALSE) standardGeneric("deconvoleConsensus"))
 
 
 # Methods
 setMethod("addExpression", "DecoCell", function(x, y) {
-
-  if(!is(object = x, class2 = 'DecoCell')) {
-
-    stop('object must be of class DecoCell, pDeco or sDeco\n')
-  }
-
   y_class <- sapply(y, class)
 
   col_factor <- y_class[y_class %in%  c("character", "factor")]
   if (!length(col_factor) == 1) {
-    stop("ERROR: Expression matrix must have JUST one column of hgnc symbols")
+    stop("Expression matrix must have a column of hgnc symbols")
   }
 
   HGNC <- which(colnames(y) == names(col_factor))
@@ -63,11 +63,6 @@ setMethod("addExpression", "DecoCell", function(x, y) {
 setMethod("addSignature", "DecoCell", function(x, ext=TRUE, sig=NULL,
                                                anno.1=NULL, anno.2=NULL) {
 
-  if(!is(object = x, class2 = 'DecoCell')) {
-
-    stop('object must be of class DecoCell, pDeco or sDeco\n')
-  }
-
   if(nrow(x@sig1) == 0){
     x@sig1 <- as.data.frame(
       readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
@@ -75,57 +70,52 @@ setMethod("addSignature", "DecoCell", function(x, ext=TRUE, sig=NULL,
                         sheet = "Curated"))
 
     x@anno1 <- list(as.data.frame(readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
-                                                                package = "Decosus"),
-                                                    sheet = "Map_1")),
+                                                       package = "Decosus"),
+                                           sheet = "Map_1")),
 
-                    as.data.frame(readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
-                                                                package = "Decosus"),
-                                                    sheet = "Map_2"))) }
+                as.data.frame(readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
+                                                            package = "Decosus"),
+                                                sheet = "Map_2"))) }
 
 
-  if(ext){
-    if(sum(ifelse(names(sig) %in% names(x@sig1), 0, 1)) != 0 |
-       sum(ifelse(names(anno.1) %in% names(anno.2), 0, 1)) != 0 |
-       sum(ifelse(names(anno.1) %in% names(x@anno1[[1]]), 0, 1)) != 0){
+    if(ext){
+      if(sum(ifelse(names(x@sig) %in% names(x@sig1), 0, 1)) != 0 |
+        sum(ifelse(names(anno.1) %in% names(anno.1), 0, 1)) != 0 |
+         sum(ifelse(names(anno.1) %in% names(x@anno1[[1]]), 0, 1)) != 0){
 
-      print("WARNING: Wrong signature or annotation file. \n
-              The ext argument is not used.")
-      print("Extension must contain:
-              --Signature -Type -Gene -Group \n
-              --Annotation Source Source_cell_type cell_type full_annotation")
-      print("See https://github.com/caanene1/Decosus")
-
-    } else {
-
-      if(nrow(x@sig2) == 0){
-        x@sig2 <- sig[c("Type", "Gene", "Group")]
-        x@anno2 <- list(anno.1[c("Source", "Source_cell_type",
-                                 "cell_type", "full_annotation")],
-                        anno.2[c("Source", "Source_cell_type",
-                                 "cell_type", "full_annotation")])
-
-      } else if(nrow(x@sig3) == 0) {
-        x@sig3 <- sig[c("Type", "Gene", "Group")]
-        x@anno3 <- list(anno.1[c("Source", "Source_cell_type",
-                                 "cell_type", "full_annotation")],
-                        anno.2[c("Source", "Source_cell_type",
-                                 "cell_type", "full_annotation")])
+        print("WARNING: Wrong signature or annotation file. \n
+              The arguments are not used.")
+        print("Extension must contain: \n
+              Signature Type Gene Group \n
+              Annotation Source Source_cell_type cell_type full_annotation")
+        print("See https://github.com/caanene1/Decosus")
 
       } else {
-        stop("Only three slots allowed for signatures. \n
+
+        if(nrow(x@sig2) == 0){
+          x@sig2 <- sig[c("Type", "Gene", "Group")]
+          x@anno2 <- list(anno.1[c("Source", "Source_cell_type",
+                                   "cell_type", "full_annotation")],
+                          anno.2[c("Source", "Source_cell_type",
+                                   "cell_type", "full_annotation")])
+
+        } else if(nrow(x@sig.2) == 0) {
+          x@sig3 <- sig[c("Type", "Gene", "Group")]
+          x@anno3 <- list(anno.1[c("Source", "Source_cell_type",
+                                   "cell_type", "full_annotation")],
+                          anno.2[c("Source", "Source_cell_type",
+                                   "cell_type", "full_annotation")])
+
+          } else {
+          stop("Only three slots allowed for signatures. \n
          Remove old slots and try again.")
+        }
       }
     }
-  }
   x
 })
 
-setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
-
-  if(!is(object = x, class2 = 'DecoCell')) {
-    stop('object must be of class DecoCell, pDeco or sDeco\n')
-  }
-
+setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq) {
 
   if (nrow(x@e.data) == 0){
     stop("Error: No expression data found. Call addExpression() first.")
@@ -143,18 +133,14 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
     x@MCP <- as.data.frame(MCPcounter::MCPcounter.estimate(xx, featuresType = "HUGO_symbols",
                                                            genes = read.table(system.file("MCPcounter", "genes.txt",
                                                                                           package = "Decosus"),
-                                                                              sep = "\t", stringsAsFactors = FALSE,
-                                                                              header = TRUE, colClasses = "character",
-                                                                              check.names = FALSE)))
+                                                           sep = "\t", stringsAsFactors = FALSE,
+                                                           header = TRUE, colClasses = "character",
+                                                           check.names = FALSE)))
 
 
-    if(!free){
-      options(warn=-1)
-      x@EPIC <- as.data.frame(t(EPIC::EPIC(bulk = xx)[[2]]))
-      options(warn=0)
-      x@EPIC$Source <- "EPIC"
-
-    }
+    options(warn=-1)
+    x@EPIC <- as.data.frame(t(EPIC::EPIC(bulk = xx)[[2]]))
+    options(warn=0)
 
     x@quanTISeq <- Decosus::quantiseq(xx, arrays = !rnaseq,
                                       mRNAscale = TRUE,
@@ -162,6 +148,7 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
 
     x@xCell$Source <- "xcell"
     x@MCP$Source <- "MCP"
+    x@EPIC$Source <- "EPIC"
     x@quanTISeq$Source <- "quanTISeq"
 
     x@p.data <- lapply(list(x@xCell, x@MCP, x@EPIC, x@quanTISeq), function(z) {
@@ -201,7 +188,7 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
       aggregated$Source <- unique(x$Group)
       return(aggregated) }
 
-    x@s.data <- lapply(x_sub_sets, aggregate_expr)
+      x@s.data <- lapply(x_sub_sets, aggregate_expr)
 
   } else {
     print("Y argument is not recorgnised")
@@ -211,11 +198,7 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
   x
 })
 
-setMethod("deconvoleConsensus", "DecoCell", function(x) {
-
-  if(!is(object = x, class2 = 'DecoCell')) {
-    stop('object must be of class DecoCell, pDeco or sDeco\n')
-  }
+setMethod("deconvoleConsensus", "DecoCell", function(x, free=FALSE) {
 
   if(length(x@p.data) + length(x@s.data) == 0){
     stop("Please, run deconvovleCell first")
@@ -223,6 +206,7 @@ setMethod("deconvoleConsensus", "DecoCell", function(x) {
 
   x@c.data <- do.call(rbind, append(x@p.data, x@s.data))
   x@c.data$ID <- paste(x@c.data$Cell, x@c.data$Source, sep="_")
+
 
   process.anno <- function(k, anno) {
     anno$ID <- paste(anno$Source_cell_type, anno$Source, sep = "_")
@@ -232,11 +216,10 @@ setMethod("deconvoleConsensus", "DecoCell", function(x) {
     return(list(a_res, sub_a_res)) }
 
   anno.count <- length(x@anno2) + length(x@anno3)
-
-  if(anno.count == 4){
+  if(anno.count == 2){
     annotate1 <- do.call(rbind, list(x@anno1[[1]], x@anno2[[1]], x@anno3[[1]]))
     annotate2 <- do.call(rbind, list(x@anno1[[2]], x@anno2[[2]], x@anno3[[2]]))
-  } else if(anno.count == 2){
+  } else if(anno.count == 1){
     annotate1 <- do.call(rbind, list(x@anno1[[1]], x@anno2[[1]]))
     annotate2 <- do.call(rbind, list(x@anno1[[2]], x@anno2[[2]]))
   } else {
@@ -298,7 +281,7 @@ setMethod("deconvoleConsensus", "DecoCell", function(x) {
 
     main_cells <- cons_nonCons(u=for_cells[[1]],
                                z=avilab(for_cells[[2]])[[1]])
-  }
+    }
 
   x@res.final <- list(main_samples = main_samples,
                       main_cells = main_cells)
@@ -366,53 +349,59 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
 #'
 #' @description Function to apply seven deconvolution/signature methods.
 #'
-#' @param x, rnaseq, exp, sig, anno.1, anno.2, cp, plot, free, mini.output
+#' @param x, platform, map, plot.corr: defaults: df, "Array", "Normal", FALSE
 #'
-#' @return list
+#' @return t_results
 #'
 #' @keywords
 #'
-#' @examples cosDeco(x=exp)
+#' @examples See the original methods.
 #'
 #' @export
 #'
-cosDeco <- function(x=df, rnaseq=T, ext=FALSE, sig=NULL, anno.1=NULL,
-                    anno.2=NULL, cp=NULL, plot=TRUE, free=FALSE,
-                    mini.output=TRUE) {
+cosDeco <- function(x=df, rnaseq=T, plot=TRUE, ext=FALSE,
+                    sig=NULL, anno.1=NULL, anno.2=NULL,
+                    free=FALSE, cp=NULL) {
 
   output <- new("pDeco")
-  output <- addExpression(output, x)
+  output <- addExpression(output, df)
   output <- addSignature(output, ext=ext, sig=sig,
                          anno.1=anno.1, anno.2=anno.2)
 
-  output <- deconvolveCell(output, "p",  rnaseq=rnaseq, free=free)
+  output <- deconvolveCell(output, "p",  rnaseq=rnaseq)
   output <- deconvolveCell(output, "s",  rnaseq=rnaseq)
-  output <- deconvoleConsensus(output)
+
+  # Program the free argument to remove EPIC from the analysis
+  output <- deconvoleConsensus(output, free=free)
 
 
   if(plot){
-    if(is.null(cp)){
-      cp.in <- readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
-                                          package="Decosus"),
-                              sheet = "Colour")
-    } else {
-      cp.in <- cp
-    }
-
-    cor.pp(output@res.final[["main_samples"]], cp=cp.in,
+    cor.pp(output@res.final[["main_samples"]], cp=cp,
            pdf.name = "Sample_consensus.pdf")
 
-    cor.pp(output@res.final[["main_cells"]], cp=cp.in,
+    cor.pp(output@res.final[["main_cells"]], cp=cp,
            pdf.name = "Cell_consensus.pdf")
   }
 
 
-  if(mini.output){
-    return(output@res.final)
-  } else {
-    return(output)
-  }
+
+
+  cp <- readxl::read_xlsx(system.file("extdata", "Signatures.xlsx",
+                                      package="Decosus"),
+                          sheet = "Colour")
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
