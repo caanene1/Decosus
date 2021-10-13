@@ -418,5 +418,3 @@ cosDeco <- function(x=df, rnaseq=T, ext=FALSE, sig=NULL, anno.1=NULL,
   }
 
 }
-
-
