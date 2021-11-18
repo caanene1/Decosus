@@ -41,6 +41,12 @@ Data frame of the colour to use in the correlation plot. Relevant if plot is tru
   \item{free}{
 Boolen indicating if you want to remove methods with restrive licences. Currently affects EPIC.
 }
+  \item{scale.i}{
+  Boolen indicating if you want to individually scale outputs from each methods before combining.
+}
+  \item{agg.method}{
+  String of the aggregation method to use, either "mean" or "geomean".
+}
   \item{mini.output}{
 Boolen indicating if you want to extract just the final reuslts or everythin.
 }

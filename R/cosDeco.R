@@ -30,9 +30,9 @@ setGeneric("addExpression", function(x, y) standardGeneric("addExpression"))
 
 setGeneric("addSignature", function(x, ext, sig, anno.1, anno.2) standardGeneric("addSignature"))
 
-setGeneric("deconvolveCell", function(x, y, rnaseq, free) standardGeneric("deconvolveCell"))
+setGeneric("deconvolveCell", function(x, y, rnaseq, free, scale.i) standardGeneric("deconvolveCell"))
 
-setGeneric("deconvoleConsensus", function(x) standardGeneric("deconvoleConsensus"))
+setGeneric("deconvoleConsensus", function(x, meth) standardGeneric("deconvoleConsensus"))
 
 
 # Methods
@@ -120,7 +120,8 @@ setMethod("addSignature", "DecoCell", function(x, ext=TRUE, sig=NULL,
   x
 })
 
-setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
+setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE,
+                                                 scale.i=T) {
 
   if(!is(object = x, class2 = 'DecoCell')) {
     stop('object must be of class DecoCell, pDeco or sDeco\n')
@@ -132,6 +133,23 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
   }
 
   xx <- x@e.data[,-which(names(x@e.data) %in% "Gene")]
+
+  ##
+  if(scale.i){
+    df.scale <- function(df="data") {
+      ## Scale the outputs individually
+      ## Don't centre to avoid negative values
+
+      out <- t(apply(df, 1, function(x) scale(x, center=FALSE)))
+      out <- as.data.frame(out)
+
+      names(out) <- names(df)
+
+      return(out)
+    }
+    ##
+  }
+
 
   if(y == "p"){
     library(xCell)
@@ -152,6 +170,11 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
       options(warn=-1)
       x@EPIC <- as.data.frame(t(EPIC::EPIC(bulk = xx)[[2]]))
       options(warn=0)
+
+      if(scale.i){
+        x@EPIC <- df.scale(x@EPIC)
+      }
+
       x@EPIC$Source <- "EPIC"
 
     }
@@ -160,9 +183,19 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
                                       mRNAscale = TRUE,
                                       method = "lsei")
 
+
+
+    if(scale.i){
+      x@xCell <- df.scale(x@xCell)
+      x@MCP <- df.scale(x@MCP)
+      x@quanTISeq <- df.scale(x@quanTISeq)
+      }
+
+
     x@xCell$Source <- "xcell"
     x@MCP$Source <- "MCP"
     x@quanTISeq$Source <- "quanTISeq"
+
 
     x@p.data <- lapply(list(x@xCell, x@MCP, x@EPIC, x@quanTISeq), function(z) {
       if(nrow(z) >= 0){
@@ -193,11 +226,16 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
       num_col <- sapply(x, is.numeric)
       return(x[ , num_col]) }
 
-    aggregate_expr <- function(x) {
+    aggregate_expr <- function(x, sca=scale.i) {
       x_num <- numeric_columns(x)
       aggregated <- aggregate(x_num, by = list(x$Type),
                               FUN = mean_convert)
       names(aggregated)[1] <- "Cell"
+
+      if(sca){
+        aggregated <- cbind(aggregated[1], df.scale(aggregated[-1]))
+      }
+
       aggregated$Source <- unique(x$Group)
       return(aggregated) }
 
@@ -211,7 +249,7 @@ setMethod("deconvolveCell", "DecoCell", function(x, y, rnaseq, free=FALSE) {
   x
 })
 
-setMethod("deconvoleConsensus", "DecoCell", function(x) {
+setMethod("deconvoleConsensus", "DecoCell", function(x, meth="geomean") {
 
   if(!is(object = x, class2 = 'DecoCell')) {
     stop('object must be of class DecoCell, pDeco or sDeco\n')
@@ -247,18 +285,44 @@ setMethod("deconvoleConsensus", "DecoCell", function(x) {
   for_samples <- process.anno(k=x@c.data, anno = annotate1)
   for_cells <- process.anno(k=x@c.data, anno = annotate2)
 
-  ########
+  ######## Methods
   mean_convert2 <- function(x) {
     mean(as.numeric(as.character(x))) }
+
+  geo.mean <- function(x, na.rm=TRUE, zero.prop = FALSE){
+
+    if (any(x < 0, na.rm = TRUE)) {
+      return(NaN)
+    }
+    if (zero.prop) {
+      if (any(x == 0, na.rm = TRUE)) {
+        return(0)
+      }
+      exp(mean(log(x), na.rm = na.rm))
+    } else {
+      exp(sum(log(x[x > 0]), na.rm = na.rm) / length(x))
+    }
+  }
+  ########
 
   numeric_columns2 <- function(x) {
     num_col <- sapply(x, is.numeric)
     return(x[ , num_col]) }
 
-  aggregate_cell <- function(x) {
+  aggregate_cell <- function(x, me=meth) {
     x_num <- numeric_columns2(x)
-    aggregated <- aggregate(x_num, by = list(x$cell_type),
-                            FUN = mean_convert2)
+
+    if(me == "mean") {
+      aggregated <- aggregate(x_num, by = list(x$cell_type),
+                              FUN = mean_convert2)
+
+    } else if (me == "geomean") {
+      aggregated <- aggregate(x_num, by = list(x$cell_type),
+                              FUN = geo.mean)
+    } else {
+      stop("Provide correct method argument, either mean or geomean")
+    }
+
     names(aggregated)[1] <- "Cell"
     aggregated$Source <- "consensus"
     return(aggregated) }
@@ -381,17 +445,17 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
 #' @export
 #'
 cosDeco <- function(x=df, rnaseq=T, ext=FALSE, sig=NULL, anno.1=NULL,
-                    anno.2=NULL, cp=NULL, plot=TRUE, free=FALSE,
-                    mini.output=TRUE) {
+                    anno.2=NULL, cp=NULL, plot=TRUE, free=FALSE, scale.i=T,
+                    agg.method="mean", mini.output=TRUE) {
 
   output <- new("pDeco")
   output <- addExpression(output, x)
   output <- addSignature(output, ext=ext, sig=sig,
                          anno.1=anno.1, anno.2=anno.2)
 
-  output <- deconvolveCell(output, "p",  rnaseq=rnaseq, free=free)
-  output <- deconvolveCell(output, "s",  rnaseq=rnaseq)
-  output <- deconvoleConsensus(output)
+  output <- deconvolveCell(output, "p",  rnaseq=rnaseq, free=free, scale.i=scale.i)
+  output <- deconvolveCell(output, "s",  rnaseq=rnaseq, scale.i=scale.i)
+  output <- deconvoleConsensus(output, meth=agg.method)
 
 
   if(plot){
