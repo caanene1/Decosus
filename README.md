@@ -32,8 +32,21 @@ devtools::install_github('BioInforCore-BCI/Decosus')
 # Example
 To use Decosus on an expression matrix, simply run: 
 ```{r example}
-results <- Decosus::cosDeco(x = df, platform = "Array", map="Normal", plot.corr=FALSE)
+results <- Decosus::cosDeco <- function(x=df, rnaseq=T, plot=TRUE, ext=FALSE,
+                    sig=NULL, anno.1=NULL, anno.2=NULL,
+                    cp=NULL, free=FALSE)
+
+# Use below to get more detials on the arguments
+?cosDeco
 ```
+In the example code above, df is the gene expression profiles in your samples and it must have just one column of gene ID or symbols as shown below.
+
+| gene  | sample1 | sample4 | sample3 |
+| --- | --- | --- | --- |
+| TGF | 30 | 20 | 1 | 
+| PDL1  |  100  | 11  |  300  |
+| CD21  |  10  | 6  |  5 |
+
 
 # Additional usage note
 Run array or bulk RNAseq data as a data frame through the tool to generate 3 outputs:
@@ -48,3 +61,5 @@ When a cell type is unique to one of the contributing methods, it is labelled ce
 All consensus cells and all unique cells for each version are included in the results table, but if needed, irrelevant or non-consensus cells can be removed from the results once generated.
 
 As the Cells version of the tool uses fewer contributing methods, the main_cells output table contains fewer cell types than main_samples. 
+
+To extend the signatures as described in the manuscript, set the ext argument to TRUE, then include the signature and annotation using the "sig" and "anno.1" and "anno.2" arguments. You can

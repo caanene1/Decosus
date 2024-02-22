@@ -32,7 +32,7 @@ Data frame of the extension signature. Needs at least anno.1 for conesus.
   \item{anno.1}{
 Data frame of the annotation for signature.This is used for the relative conseus.
 }
-  \item{anno.1}{
+  \item{anno.2}{
 Data frame of the annotation for signature.This is used for the absolute conseus.
 }
   \item{cp}{

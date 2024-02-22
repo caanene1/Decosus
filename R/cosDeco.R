@@ -429,7 +429,6 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
 }
 
 
-
 #' @title Create consensus deconvolution.
 #'
 #' @description Function to apply seven deconvolution/signature methods.
