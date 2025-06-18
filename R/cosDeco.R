@@ -429,20 +429,45 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
 }
 
 
-#' @title Create consensus deconvolution.
+#' @title Create consensus deconvolution
 #'
-#' @description Function to apply seven deconvolution/signature methods.
+#' @description
+#' Applies seven deconvolution or gene signature-based estimation methods
+#' to derive consensus estimates of cell-type or signature proportions from expression data.
+#' Combines results for robustness and flexibility in downstream analyses.
 #'
-#' @param x, rnaseq, exp, sig, anno.1, anno.2, cp, plot, free, mini.output
+#' @param df Expression data frame (genes × samples), only one column of none numeric allowed.
+#'          This is the main input.
+#' @param rnaseq Logical flag indicating whether the input expression matrix is RNA-seq data.
+#'               Affects normalization and method selection. Default is `TRUE`.
+#' @param sig Data frame of extension signature matrix to be combined with the in-built signatures.
+#'             It must have three columns named "Type	Gene	Group"
+#' @param anno.1 Map_1 data frame for the signatures in the extension given as "sig".
+#' @param anno.2 Map_2 data frame for the signatures in the extension given as "sig".
+#' @param cp Logical; whether to generate correlation plots during processing.
+#' @param plot Logical; whether to display plot. Default is `FALSE`.
+#' @param free Logical; if `TRUE`, allows unconstrained (or relaxed) deconvolution when applicable.
+#'             This may apply to certain optimization steps.
+#' @param mini.output Logical; if `TRUE`, returns a simplified output with only essential results.
+#'                    Default is `FALSE`.
 #'
-#' @return list
+#' @return A list containing:
+#' \describe{
+#'   \item{consensus}{Consensus deconvolution result (matrix of cell-type proportions)}
+#'   \item{methods}{Results from each individual method}
+#'   \item{params}{Metadata and parameters used}
+#' }
 #'
-#' @keywords
+#' @keywords deconvolution, gene expression, cell type proportion, signature matrix, consensus
 #'
-#' @examples cosDeco(x=exp)
+#' @examples
+#' # Basic usage with expression matrix:
+#' cosDeco(x = exp)
+#'
+#' # Using a custom signature matrix and plotting enabled:
+#' cosDeco(x = exp, sig = my_sig, plot = TRUE)
 #'
 #' @export
-#'
 cosDeco <- function(x=df, rnaseq=T, ext=FALSE, sig=NULL, anno.1=NULL,
                     anno.2=NULL, cp=NULL, plot=TRUE, free=FALSE, scale.i=T,
                     agg.method="mean", mini.output=TRUE) {
