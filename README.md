@@ -18,7 +18,13 @@ Use:
   devtools::install_github("GfellerLab/EPIC", build_vignettes = TRUE)
 You may need to install devtools.
 
+Or using the install_packages_manually.R file in the root of the repo to achieve this. 
+NOTE: The system needs to have GNU Fortran compiler to setup limSolva. 
+In most cases you will have this already, Macs maybe any issue so head over to https://mac.r-project.org/tools/.
+limSolva is currently archived by CRAN so it is installing directly from that archive. I will attempt to remove the limSolve dependecy from the quantiseq implementationif possible.
+
 # Installation
+Decosus is tested for the current version of R 4.5.1
 You can install the released version of Decosus from [github](https://github.com/caanene1) with:
 
 ``` r
@@ -32,7 +38,7 @@ devtools::install_github('BioInforCore-BCI/Decosus')
 # Example
 To use Decosus on an expression matrix, simply run: 
 ```{r example}
-results <- Decosus::cosDeco <- function(x=df, rnaseq=T, plot=TRUE, ext=FALSE,
+results <- Decosus::cosDeco(x=df, rnaseq=T, plot=TRUE, ext=FALSE,
                     sig=NULL, anno.1=NULL, anno.2=NULL,
                     cp=NULL, free=FALSE)
 
@@ -62,4 +68,25 @@ All consensus cells and all unique cells for each version are included in the re
 
 As the Cells version of the tool uses fewer contributing methods, the main_cells output table contains fewer cell types than main_samples. 
 
-To extend the signatures as described in the manuscript, set the ext argument to TRUE, then include the signature and annotation using the "sig" and "anno.1" and "anno.2" arguments. You can
+# Extension of signatures
+To extend the signatures as described in the manuscript, set the `ext` argument to TRUE, and provide the signature and annotation using the `sig`, `anno.1`, and `anno.2` arguments.
+
+A template file for creating these extended signatures is available in the /template_for_adding_extension folder. The most important requirement is to ensure that the column headings remain consistent, so the tool can correctly identify and process the signatures.
+
+The /template_for_adding_extension folder also contains a subfolder /01_inbuilt-signatures, which provides details of the original cell mappings.
+
+If you want the extended signatures to be used in generating the consensus values, ensure that the cell_type names in your extension files (anno.1 and anno.2) match those in the Map_1 and Map_2 sheets, respectively.
+
+##### Running with extension
+``` 
+df <- read.csv("rna_expression.csv")
+sig_ext <- read.csv("sig.csv")
+#### Optionally
+anno.1_ext <- read.csv("anno.1.csv")
+anno.2_ext <- read.csv("anno.1.csv")
+#### Run decusus with extension
+res <- cosDeco(x=df, rnaseq=T, plot=TRUE, ext=TRUE,
+                    sig=sig_ext, anno.1=anno.1_ext, anno.2=anno.2_ext,
+                    cp=NULL, free=FALSE) 
+```
+
