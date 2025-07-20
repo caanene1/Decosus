@@ -1,7 +1,9 @@
 # Decosus
+
 Decosus consolidates the results of 7 independently published deconvolution software to generate a robust estimation of cell composition in heterogeneous tissue from bulk expression data.
 
 # Description
+
 The inability to identify the phenotype and abundance of cells is a major limitation of bulk expression data sets. Deconvolution methods use gene signatures from purified cell populations to estimate the presence of different cells. Decosus combines the results from 7 independent deconvolution methods in order to more accurately estimate the abundance of key immune and stromal cells than by using one method alone. A unique advantage of Decosus is the ability to adapt the tool to facilitate the type of downstream analyses required, thus two versions of Decosus are possible: 
 '''
  - Sample: includes data from all 7 methods to give the most comprehensive overview of cell composition, and allows across-sample comparison for each cell type.
@@ -11,6 +13,7 @@ Further, the tool can use different cell mapping depending on user needs.
 
 
 # Dependencies
+
 Decosus depends on certain published signatures and methods. The packages associated with the methods are configured to install automatically. However, you can install them directly if you have problems getting them on your machine.
 Use: 
   devtools::install_github('dviraran/xCell', force = TRUE)
@@ -24,6 +27,7 @@ In most cases you will have this already, Macs maybe any issue so head over to h
 limSolva is currently archived by CRAN so it is installing directly from that archive. I will attempt to remove the limSolve dependecy from the quantiseq implementationif possible.
 
 # Installation
+
 Decosus is tested for the current version of R 4.5.1
 You can install the released version of Decosus from [github](https://github.com/caanene1) with:
 
@@ -36,6 +40,7 @@ devtools::install_github('BioInforCore-BCI/Decosus')
 ```
 
 # Example
+
 To use Decosus on an expression matrix, simply run: 
 ```{r example}
 results <- Decosus::cosDeco(x=df, rnaseq=T, plot=TRUE, ext=FALSE,
@@ -55,6 +60,7 @@ In the example code above, df is the gene expression profiles in your samples an
 
 
 # Additional usage note
+
 Run array or bulk RNAseq data as a data frame through the tool to generate 3 outputs:
  - Main_samples for across-sample comparison version of the tool
  - Main_cells for the within-sample comparison version of the tool
@@ -78,6 +84,7 @@ The /template_for_adding_extension folder also contains a subfolder /01_inbuilt-
 If you want the extended signatures to be used in generating the consensus values, ensure that the cell_type names in your extension files (anno.1 and anno.2) match those in the Map_1 and Map_2 sheets, respectively.
 
 ##### Running with extension
+
 ``` 
 df <- read.csv("rna_expression.csv")
 sig_ext <- read.csv("sig.csv")
@@ -89,4 +96,19 @@ res <- cosDeco(x=df, rnaseq=T, plot=TRUE, ext=TRUE,
                     sig=sig_ext, anno.1=anno.1_ext, anno.2=anno.2_ext,
                     cp=NULL, free=FALSE) 
 ```
+
+### Update v0.2.0
+
+This new version extends the embedded signatures by including the large sets of cell markers from the Human Cell Marker database (http://xteam.xbio.top/CellMarker/index.jsp).
+The inclusion of these additional signatures significantly enhances consensus generation, consistent with our previous observations when running these signatures ad hoc.
+We previously used this database to demonstrate the utility of the tool in our original manuscript (see below).
+Additionally, we have included some specialised signatures, including those for exosomes, hypoxia, and reference genes.
+
+## Citation
+
+Please cite:
+Decosus: an R framework for universal integration of cell proportion estimation methods. Frontiers in genetics, 13, p.802838. <br>
+Anene, C.A., Taggart, E., Harwood, C.A., Pennington, D.J. and Wang, J., 2022. 
+
+
 

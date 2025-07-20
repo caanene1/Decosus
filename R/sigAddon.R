@@ -20,23 +20,23 @@ sigAddon <- function(path = url.in, is.web = T, min.set=3){
     print("Local import!")
   }
 
-  in.file <- read.delim(url.in)
-  in.file$Group <- paste(in.file$cancerType, in.file$tissueType,
-                         sep = "_")
-
+  in.file <- read.delim(path)
+  in.file <- in.file[!in.file$markerResource %in% "Single-cell sequencing", ]
   in.file <-in.file[c("cellName", "geneSymbol")]
-  uni.cell <- unique(in.file$cellName)
 
-  i <- uni.cell[1]
+  # i <- uni.cell[1]
   out.file <- data.frame(Type=character(),
                          Gene=character())
 
-  for(i in uni.cell){
+  for(i in unique(in.file$cellName)){
     c.ii <- in.file[in.file$cellName == i, ]
+
     c.ii <- c.ii$geneSymbol
+
     c.ii <- lapply(c.ii, function(z){
       z <- strsplit(z, " +")
     })
+
     c.ii <- as.character(unlist(c.ii))
 
     c.ii <- data.frame(Type = i,
@@ -46,17 +46,22 @@ sigAddon <- function(path = url.in, is.web = T, min.set=3){
       out.file <- rbind(out.file, c.ii)
     }
 
-
   }
 
   out.file$Gene <- sub("\\[|\\]", "", out.file$Gene)
   out.file$Gene <- sub(",", "", out.file$Gene)
-  out.file$Group <- "CM"
+  out.file$Group <- "CMdb"
+  out.file$filter <- paste(out.file$Type, out.file$Gene)
+  out.file <- out.file[!duplicated(out.file$filter), ]
+  out.file$is.gene <- ifelse(grepl("[a-z]", out.file$Gene), "no", "yes")
+  out.file <- out.file[out.file$is.gene %in% "yes", ]
+  out.file <- out.file[!out.file$Gene %in% c("NA", "II", "I", "MHC"), ]
+  ##
+  tcount <- as.data.frame(table(out.file$Type))
+  tcount <- tcount[tcount$Freq >= min.set,]
+  ##
+  out.file <- out.file[out.file$Type %in% tcount$Var1, ]
 
-  filterF <- paste(out.file$Type, out.file$Gene, sep = "_")
-  out.file <- out.file[!duplicated(filterF), ]
 
-  return(list(out.file, in.file))
+  return(list(out.file[c("Type", "Gene", "Group")], tcount, in.file))
 }
-
-
