@@ -442,8 +442,8 @@ cor.pp <- function(p, cp=NULL, pdf.name) {
 #'               Affects normalization and method selection. Default is `TRUE`.
 #' @param sig Data frame of extension signature matrix to be combined with the in-built signatures.
 #'             It must have three columns named "Type	Gene	Group"
-#' @param anno.1 Map_1 data frame for the signatures in the extension given as "sig".
-#' @param anno.2 Map_2 data frame for the signatures in the extension given as "sig".
+#' @param anno.1 Map_1 data frame for the signatures in the extension given as "sig" (relative consensus).
+#' @param anno.2 Map_2 data frame for the signatures in the extension given as "sig" (absolute consensus).
 #' @param cp Logical; whether to generate correlation plots during processing.
 #' @param plot Logical; whether to display plot. Default is `FALSE`.
 #' @param free Logical; if `TRUE`, allows unconstrained (or relaxed) deconvolution when applicable.
